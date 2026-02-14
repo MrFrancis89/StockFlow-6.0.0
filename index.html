@@ -18,6 +18,7 @@
             --shop-bg: #2C1A1A; --borda-caixas: #555555; 
             
             --btn-add: #E0E0E0; --btn-add-text: #121212;
+            --btn-star: #F59E0B; --btn-star-text: #FFFFFF;
             --btn-red: #B91C1C;    
             --btn-green: #047857;  
             --btn-blue: #1D4ED8;   
@@ -31,6 +32,7 @@
             --shop-bg: #FCE7F3; --borda-caixas: #9CA3AF;
             
             --btn-add: #121212; --btn-add-text: #FFFFFF;
+            --btn-star: #D97706; --btn-star-text: #FFFFFF;
             --btn-red: #EF4444;    
             --btn-green: #10B981;  
             --btn-blue: #3B82F6;   
@@ -72,9 +74,14 @@
 
         .search-container { display: flex; gap: 6px; margin-bottom: 8px; }
         .input-group { display: grid; grid-template-columns: 1.5fr 0.7fr 0.8fr; gap: 6px; align-items: end; }
-        button { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; text-transform: uppercase; font-size: 11px; transition: transform 0.1s ease, background-color 0.3s, color 0.3s; }
         
-        #add-btn { background-color: var(--btn-add); color: var(--btn-add-text); grid-column: span 3; margin-top: 4px; }
+        /* GRUPO DE BOTÕES DUPLOS (ADICIONAR / FIXAR) */
+        .action-group { grid-column: span 3; display: flex; gap: 6px; margin-top: 4px; }
+        button { border: none; border-radius: 6px; cursor: pointer; font-weight: 800; text-transform: uppercase; transition: transform 0.1s ease, background-color 0.3s, color 0.3s; }
+        .btn-half { flex: 1; padding: 10px; font-size: 11px; }
+        
+        #add-btn { background-color: var(--btn-add); color: var(--btn-add-text); }
+        #add-star-btn { background-color: var(--btn-star); color: var(--btn-star-text); }
         
         table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); table-layout: fixed; transition: all 0.3s; }
         th { background-color: var(--highlight); color: var(--accent); text-align: left; padding: 10px; font-size: 10px; text-transform: uppercase; transition: all 0.3s; }
@@ -99,7 +106,7 @@
 
         .btn-remove { background: transparent; color: var(--btn-danger); opacity: 0.5; font-size: 14px; width: 100%; border: none; padding: 0; transition: opacity 0.3s, transform 0.1s ease; }
         .share-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
-        .btn-zap { background-color: var(--highlight); color: var(--text); border: 1px solid var(--border); padding: 12px; }
+        .btn-zap { background-color: var(--highlight); color: var(--text); border: 1px solid var(--border); padding: 12px; font-size: 11px; }
         
         #area-compras { margin-top: 30px; background-color: var(--shop-bg); border: 1px solid #442222; padding: 15px; border-radius: 10px; display: none; transition: all 0.3s; }
         body.light-mode #area-compras { border: 1px solid #FBCFE8; }
@@ -108,14 +115,14 @@
         #lista-compras-visual { list-style: none; padding: 0; margin: 0 0 15px 0; }
         #lista-compras-visual li { padding: 4px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
 
-        .btn-compra { background-color: var(--btn-red); color: white; border: none; }
+        .btn-compra { background-color: var(--btn-red); color: white; border: none; padding: 12px; font-size: 11px;}
         #btn-novo-dia { background-color: var(--btn-green); color: white; border: none; width: 100%; margin-top: 20px; padding: 15px; font-size: 12px; }
         #btn-exportar { background-color: var(--btn-blue); color: white; border: none; width: 100%; margin-top: 10px; padding: 15px; font-size: 12px; }
         #btn-importar { background-color: var(--btn-purple); color: white; border: none; width: 100%; margin-top: 10px; padding: 15px; font-size: 12px; }
         #btn-reset { background: transparent; color: var(--btn-danger); border: 1px solid var(--btn-danger); width: 100%; margin-top: 20px; font-size: 10px; padding: 10px; opacity: 0.8; }
 
         .nav-float { position: fixed; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
-        .btn-nav { width: 38px; height: 38px; border-radius: 50%; background-color: var(--card); color: var(--accent); border: 1px solid var(--border); font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+        .btn-nav { width: 38px; height: 38px; border-radius: 50%; background-color: var(--card); color: var(--accent); border: 1px solid var(--border); font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4); padding: 0;}
         #status-save { text-align: right; font-size: 8px; color: var(--btn-green); margin-top: 4px; opacity: 0; transition: opacity 0.3s; }
 
         #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
@@ -174,7 +181,11 @@
                     <option value="pct">pct</option><option value="cx">cx</option><option value="bld">bld</option><option value="crt">crt</option>
                 </select>
             </div>
-            <button id="add-btn" onclick="adicionarManual()">ADICIONAR</button>
+            
+            <div class="action-group">
+                <button id="add-btn" class="btn-half" onclick="adicionarManual(false)">Adicionar</button>
+                <button id="add-star-btn" class="btn-half" onclick="adicionarManual(true)">⭐ Fixar Padrão</button>
+            </div>
         </div>
         <div id="status-save">Salvo.</div>
     </div>
@@ -293,6 +304,29 @@
         var areaCompras = document.getElementById("area-compras");
         var ulCompras = document.getElementById("lista-compras-visual");
 
+        // CARREGA A LISTA DE FÁBRICA + OS ITENS FIXADOS DO USUÁRIO
+        function carregarListaPadrao() {
+            var listaCombinada = [];
+            
+            // 1. Itens padrão do sistema
+            produtosPadrao.forEach(p => { 
+                var d = p.split("|"); 
+                listaCombinada.push({ n: d[0], q: "", u: d[1], c: false });
+            });
+
+            // 2. Itens do usuário marcados com Estrela (fixados)
+            var favoritosUsuario = JSON.parse(localStorage.getItem("meusItensPadrao_v3") || "[]");
+            favoritosUsuario.forEach(item => {
+                // Adiciona apenas se já não existir no padrão (evita duplicação)
+                if(!listaCombinada.some(i => i.n.toLowerCase() === item.n.toLowerCase())) {
+                    listaCombinada.push({ n: item.n, q: "", u: item.u, c: false });
+                }
+            });
+
+            listaCombinada.sort((a, b) => a.n.localeCompare(b.n));
+            listaCombinada.forEach(i => inserirLinha(i.n, i.q, i.u, i.c));
+        }
+
         function iniciarApp() {
             if(localStorage.getItem('temaEstoque') === 'claro') { document.body.classList.add('light-mode'); }
             atualizarTitulos();
@@ -300,7 +334,7 @@
             if (salvos && JSON.parse(salvos).length > 0) {
                 var dados = JSON.parse(salvos); dados.sort((a, b) => a.n.localeCompare(b.n)); dados.forEach(i => inserirLinha(i.n, i.q, i.u, i.c || false));
             } else {
-                produtosPadrao.sort().forEach(p => { var d = p.split("|"); inserirLinha(d[0], "", d[1], false); });
+                carregarListaPadrao();
             }
             atualizarDropdown(); atualizarPainelCompras(); 
         }
@@ -429,14 +463,35 @@
             }); 
         }
         
-        function adicionarManual() {
+        // FUNÇÃO ATUALIZADA (LIDA COM O BOTÃO NORMAL E COM O BOTÃO DE FIXAR)
+        function adicionarManual(salvarNoPadrao) {
             var p = document.getElementById("novoProduto").value.trim();
             var q = document.getElementById("novoQtd").value.trim();
             var u = document.getElementById("novoUnidade").value;
             if (!p) { mostrarToast("⚠️ Digite o nome do produto!"); return; }
             darFeedback();
-            inserirLinha(p, q, u, false); salvarEOrdenar(); mostrarToast("Adicionado! ➕");
-            document.getElementById("novoProduto").value = ""; document.getElementById("novoQtd").value = "";
+            
+            // Adiciona na tela e ordena
+            inserirLinha(p, q, u, false); 
+            salvarEOrdenar(); 
+            
+            // Se o usuário clicou no botão Dourado (Fixar)
+            if(salvarNoPadrao) {
+                var favoritosUsuario = JSON.parse(localStorage.getItem("meusItensPadrao_v3") || "[]");
+                // Checa se já existe para não duplicar
+                if(!favoritosUsuario.some(item => item.n.toLowerCase() === p.toLowerCase())) {
+                    favoritosUsuario.push({ n: p, u: u });
+                    localStorage.setItem("meusItensPadrao_v3", JSON.stringify(favoritosUsuario));
+                    mostrarToast("Item FIXADO no padrão! ⭐");
+                } else {
+                    mostrarToast("Item já estava fixado! ➕");
+                }
+            } else {
+                mostrarToast("Adicionado! ➕");
+            }
+
+            document.getElementById("novoProduto").value = ""; 
+            document.getElementById("novoQtd").value = "";
         }
         
         function filtrarGeral() {
@@ -455,7 +510,7 @@
         }
         
         function resetarTudo() { 
-            mostrarConfirmacao("ATENÇÃO: Isso apagará tudo e carregará a lista padrão do sistema. Confirmar?", () => { 
+            mostrarConfirmacao("ATENÇÃO: Isso carregará a lista padrão (Sistema + Seus Itens Fixados).\nConfirmar?", () => { 
                 localStorage.removeItem("estoqueDados_v3"); location.reload(); 
             }); 
         }
