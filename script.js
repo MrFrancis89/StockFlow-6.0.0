@@ -1,4 +1,4 @@
-// v5.2.3 - Swipe com dois botões, alertas corrigidos, unidade no modal
+// v5.2.4 - Lista padrão restaurada, swipe com botões de cores exatas, unidade configurável nos alertas
 let audioCtx = null;
 let inputCalculadoraAtual = null;
 let expressaoCalc = "";
@@ -379,22 +379,24 @@ function abrirModalAlertaParaLinha(tr) {
     itemAlertaAtual = tr;
     let min = tr.dataset.min ? parseFloat(tr.dataset.min) : '';
     let max = tr.dataset.max ? parseFloat(tr.dataset.max) : '';
+    let minUnidade = tr.dataset.minUnidade || '';
+    let maxUnidade = tr.dataset.maxUnidade || '';
+
     document.getElementById('alerta-min').value = min !== '' ? min : '';
     document.getElementById('alerta-max').value = max !== '' ? max : '';
 
-    // Obter a unidade do produto
+    // Se não houver unidade salva, usar a unidade atual do produto
     let unidadeSelect = tr.querySelector('.select-tabela');
-    let unidade = unidadeSelect ? unidadeSelect.value : 'kg';
-    document.getElementById('unidade-min').innerText = unidade;
-    document.getElementById('unidade-max').innerText = unidade;
+    let unidadeAtual = unidadeSelect ? unidadeSelect.value : 'kg';
+
+    let selectMin = document.getElementById('alerta-min-unidade');
+    let selectMax = document.getElementById('alerta-max-unidade');
+
+    // Preencher selects com as unidades salvas ou a atual
+    selectMin.value = minUnidade || unidadeAtual;
+    selectMax.value = maxUnidade || unidadeAtual;
 
     document.getElementById('modal-alerta').style.display = 'flex';
-}
-
-function abrirModalAlerta(icon) {
-    // Mantido para compatibilidade, mas não será usado
-    let tr = icon.closest('tr');
-    if (tr) abrirModalAlertaParaLinha(tr);
 }
 
 function fecharModalAlerta() {
@@ -404,60 +406,100 @@ function fecharModalAlerta() {
 
 function salvarAlerta() {
     if (!itemAlertaAtual) return;
+
     let min = document.getElementById('alerta-min').value;
     let max = document.getElementById('alerta-max').value;
+    let minUnidade = document.getElementById('alerta-min-unidade').value;
+    let maxUnidade = document.getElementById('alerta-max-unidade').value;
+
     min = min ? parseFloat(min) : null;
     max = max ? parseFloat(max) : null;
 
     itemAlertaAtual.dataset.min = min !== null ? min : '';
     itemAlertaAtual.dataset.max = max !== null ? max : '';
+    itemAlertaAtual.dataset.minUnidade = minUnidade || '';
+    itemAlertaAtual.dataset.maxUnidade = maxUnidade || '';
 
     salvarDados();
     verificarAlertas();
     fecharModalAlerta();
 }
 
+// Função auxiliar para converter valores entre unidades (kg ↔ g)
+function converterParaUnidade(valor, deUnidade, paraUnidade) {
+    if (deUnidade === paraUnidade) return valor;
+    if (deUnidade === 'kg' && paraUnidade === 'g') return valor * 1000;
+    if (deUnidade === 'g' && paraUnidade === 'kg') return valor / 1000;
+    // Para outras unidades, assume-se 1:1 (não há conversão)
+    return valor;
+}
+
 function verificarAlertas() {
     let dados = JSON.parse(localStorage.getItem(storageKey) || "[]");
     dados.forEach(item => {
-        // Conversão robusta da quantidade
+        // Quantidade atual do produto (convertida para número)
         let qtdStr = (item.q || '').replace(',', '.').replace(/[^\d.-]/g, '');
-        let qtd = parseFloat(qtdStr) || 0;
-        
-        if (item.min !== null && item.min !== undefined && qtd < item.min && qtd > 0) {
-            mostrarToast(`⚠️ Estoque baixo: ${item.n}`);
-            // Marca o checkbox automaticamente
-            document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
-                let nome = r.querySelector('.nome-prod').innerText.trim();
-                if (nome === item.n) {
-                    let chk = r.querySelector('input[type="checkbox"]');
-                    if (!chk.checked) {
-                        chk.checked = true;
-                        alternarCheck(chk);
+        let qtdAtual = parseFloat(qtdStr) || 0;
+        let unidadeAtual = item.u || 'kg';
+
+        // Verifica alerta mínimo
+        if (item.min !== null && item.min !== undefined && item.min > 0) {
+            let minValor = item.min;
+            let minUnidade = item.minUnidade || unidadeAtual;
+            // Converte a quantidade atual para a unidade do alerta mínimo
+            let qtdConvertida = converterParaUnidade(qtdAtual, unidadeAtual, minUnidade);
+            if (qtdConvertida < minValor && qtdAtual > 0) {
+                mostrarToast(`⚠️ Estoque baixo: ${item.n}`);
+                // Marca o checkbox automaticamente
+                document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
+                    let nome = r.querySelector('.nome-prod').innerText.trim();
+                    if (nome === item.n) {
+                        let chk = r.querySelector('input[type="checkbox"]');
+                        if (!chk.checked) {
+                            chk.checked = true;
+                            alternarCheck(chk);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-        if (item.max !== null && item.max !== undefined && qtd > item.max) {
-            mostrarToast(`📦 Estoque excessivo: ${item.n}`);
+
+        // Verifica alerta máximo
+        if (item.max !== null && item.max !== undefined && item.max > 0) {
+            let maxValor = item.max;
+            let maxUnidade = item.maxUnidade || unidadeAtual;
+            let qtdConvertida = converterParaUnidade(qtdAtual, unidadeAtual, maxUnidade);
+            if (qtdConvertida > maxValor) {
+                mostrarToast(`📦 Estoque excessivo: ${item.n}`);
+            }
         }
     });
 }
 
 // ===== FUNÇÕES PRINCIPAIS =====
+var storageKey = "estoqueDados_v4_categorias"; 
+var storageOcultos = "itensOcultosPadrao_v4"; 
+var storageMeus = "meusItensPadrao_v4";
+
+var containerItens = document.getElementById("lista-itens-container"); 
+var selectFiltro = document.getElementById("filtroSelect"); 
+var buscaInput = document.getElementById("filtroBusca"); 
+var areaCompras = document.getElementById("area-compras"); 
+var ulCompras = document.getElementById("lista-compras-visual");
+
 function carregarListaPadrao() { 
     var listaCombinada = []; 
     var ocultosSistema = JSON.parse(localStorage.getItem(storageOcultos) || "[]"); 
     produtosPadrao.forEach(p => { 
         var d = p.split("|"); 
         if (!ocultosSistema.includes(d[0].toLowerCase())) { 
-            listaCombinada.push({ n: d[0], q: "", u: d[1], c: false, min: null, max: null }); 
+            listaCombinada.push({ n: d[0], q: "", u: d[1], c: false, min: null, max: null, minUnidade: null, maxUnidade: null }); 
         } 
     }); 
     var favoritosUsuario = JSON.parse(localStorage.getItem(storageMeus) || "[]"); 
     favoritosUsuario.forEach(item => { 
         if(!listaCombinada.some(i => i.n.toLowerCase() === item.n.toLowerCase())) { 
-            listaCombinada.push({ n: item.n, q: "", u: item.u, c: false, min: null, max: null }); 
+            listaCombinada.push({ n: item.n, q: "", u: item.u, c: false, min: null, max: null, minUnidade: null, maxUnidade: null }); 
         } 
     }); 
     renderizarListaCompleta(listaCombinada); 
@@ -481,17 +523,19 @@ function renderizarListaCompleta(dados) {
             trHeader.innerHTML = `<td colspan="4" class="categoria-header" style="background-color: ${coresCategorias[cat]}">${nomesCategorias[cat]}</td>`; 
             containerItens.appendChild(trHeader); 
             grupos[cat].forEach(item => { 
-                inserirLinhaNoDOM(item.n, item.q, item.u, item.c, item.min, item.max); 
+                inserirLinhaNoDOM(item.n, item.q, item.u, item.c, item.min, item.max, item.minUnidade, item.maxUnidade); 
             }); 
         } 
     } 
 }
 
-function inserirLinhaNoDOM(n, q, u, chk, min, max) { 
+function inserirLinhaNoDOM(n, q, u, chk, min, max, minUnidade, maxUnidade) { 
     var tr = document.createElement("tr"); 
     if(chk) tr.classList.add("linha-marcada");
     tr.dataset.min = min !== null && min !== undefined ? min : '';
     tr.dataset.max = max !== null && max !== undefined ? max : '';
+    tr.dataset.minUnidade = minUnidade || '';
+    tr.dataset.maxUnidade = maxUnidade || '';
     
     tr.innerHTML = `
         <td class="col-check"><input type="checkbox" onchange="alternarCheck(this)" ${chk ? 'checked' : ''}></td>
@@ -527,7 +571,9 @@ function salvarDados() {
             let chk = c[0].querySelector("input[type='checkbox']").checked; 
             let min = r.dataset.min ? parseFloat(r.dataset.min) : null; 
             let max = r.dataset.max ? parseFloat(r.dataset.max) : null; 
-            dados.push({ n: nome, q: qtd, u: unid, c: chk, min: min, max: max }); 
+            let minUnidade = r.dataset.minUnidade || null;
+            let maxUnidade = r.dataset.maxUnidade || null;
+            dados.push({ n: nome, q: qtd, u: unid, c: chk, min: min, max: max, minUnidade: minUnidade, maxUnidade: maxUnidade }); 
         } 
     }); 
     localStorage.setItem(storageKey, JSON.stringify(dados)); 
@@ -644,7 +690,7 @@ function adicionarManual(salvarNoPadrao) {
         return;
     }
 
-    dados.push({ n: p, q: q, u: u, c: false, min: null, max: null }); 
+    dados.push({ n: p, q: q, u: u, c: false, min: null, max: null, minUnidade: null, maxUnidade: null }); 
     renderizarListaCompleta(dados); 
     salvarDados(); 
     
@@ -724,6 +770,34 @@ function atualizarDropdown() {
     selectFiltro.value = v; 
 }
 
+function obterDataAtual() { return new Date().toLocaleDateString('pt-BR'); }
+function obterDataAmanha() { let hoje = new Date(); let amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1); return amanha.toLocaleDateString('pt-BR'); }
+
+function atualizarTitulos() { 
+    document.getElementById("titulo-pagina").innerHTML = `<span class="titulo-estoque" style="font-weight: 400; letter-spacing: 1px; color: #cccccc;">ESTOQUE</span> <span style="color: var(--btn-danger); font-weight: 900; margin-left: 4px;">V5.2</span>`; 
+    document.getElementById("titulo-compras").innerText = "LISTA " + obterDataAmanha(); 
+}
+
+// Toast e modais
+let acaoConfirmacao = null;
+function mostrarToast(msg) { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = 'toast'; toast.innerText = msg; container.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000); }
+function mostrarConfirmacao(msg, callback, tipoBotao = 'perigo') { darFeedback(); document.getElementById('modal-text').innerText = msg; const btnCancel = document.getElementById('modal-btn-cancel'); const btnConfirm = document.getElementById('modal-btn-confirm'); btnCancel.style.display = 'block'; btnCancel.innerText = 'Cancelar'; btnConfirm.style.display = 'block'; btnConfirm.innerText = 'Confirmar'; btnConfirm.style.backgroundColor = (tipoBotao === 'sucesso') ? 'var(--btn-green)' : 'var(--btn-red)'; document.getElementById('modal-confirm').style.display = 'flex'; acaoConfirmacao = callback; }
+function mostrarAlertaElegante(msg) { darFeedback(); document.getElementById('modal-text').innerText = msg; const btnCancel = document.getElementById('modal-btn-cancel'); const btnConfirm = document.getElementById('modal-btn-confirm'); btnCancel.style.display = 'none'; btnConfirm.style.display = 'block'; btnConfirm.innerText = 'OK'; btnConfirm.style.backgroundColor = 'var(--btn-blue)'; document.getElementById('modal-confirm').style.display = 'flex'; acaoConfirmacao = null; }
+function fecharModal() { document.getElementById('modal-confirm').style.display = 'none'; acaoConfirmacao = null; }
+document.getElementById('modal-btn-confirm').addEventListener('click', () => { darFeedback(); if(acaoConfirmacao) acaoConfirmacao(); fecharModal(); });
+
+// Calculadora
+function abrirCalculadora(inputElement) { if (justSwiped || swipedRow) return; darFeedback(); inputElement.blur(); inputCalculadoraAtual = inputElement; let tituloCalc = "🧮 Calculadora"; if (inputElement.id === "novoQtd") { let nomeNovo = document.getElementById("novoProduto").value.trim(); tituloCalc = nomeNovo ? "🧮 " + nomeNovo : "🧮 NOVO ITEM"; } else { let linha = inputElement.closest("tr"); if (linha) { let nomeTabela = linha.querySelector(".nome-prod").innerText.trim(); tituloCalc = "🧮 " + nomeTabela; } } document.getElementById("calc-title").innerText = tituloCalc; let val = inputElement.value.replace(',', '.').trim(); expressaoCalc = val || ""; atualizarDisplayCalc(); document.getElementById('modal-calc').style.display = 'flex'; }
+function fecharCalculadora() { darFeedback(); document.getElementById('modal-calc').style.display = 'none'; inputCalculadoraAtual = null; }
+function calcDigito(digito) { darFeedback(); if (digito === 'C') { expressaoCalc = ""; } else if (digito === 'BACK') { expressaoCalc = expressaoCalc.slice(0, -1); } else { if (digito === ',') digito = '.'; expressaoCalc += digito; } atualizarDisplayCalc(); }
+function atualizarDisplayCalc() { let display = document.getElementById('calc-display'); display.innerText = expressaoCalc.replace(/\./g, ',') || "0"; }
+function calcSalvar() { darFeedback(); try { let expr = expressaoCalc.replace(/×/g, '*').replace(/÷/g, '/'); expr = expr.replace(/[^0-9+\-*/.]/g, ''); if (expr) { let resultado = Function('"use strict";return (' + expr + ')')(); if (!isFinite(resultado)) throw new Error("Erro"); resultado = Math.round(resultado * 100) / 100; inputCalculadoraAtual.value = resultado.toString().replace('.', ','); } else { inputCalculadoraAtual.value = ""; } salvarDados(); fecharCalculadora(); mostrarToast("Quantidade Salva ✅"); } catch (e) { document.getElementById('calc-display').innerText = "Erro"; setTimeout(atualizarDisplayCalc, 1000); } }
+
+// Outras funções utilitárias
+function limparCampo(idCaixaTexto) { darFeedback(); document.getElementById(idCaixaTexto).value = ''; document.getElementById(idCaixaTexto).focus(); if (idCaixaTexto === 'filtroBusca') { filtrarGeral(); } }
+function alternarLista() { darFeedback(); var tabelaWrapper = document.querySelector(".table-wrapper"); var btnToggle = document.getElementById("btn-toggle-lista"); if (tabelaWrapper.style.display === "none") { tabelaWrapper.style.display = "block"; btnToggle.innerHTML = "🔽 Ocultar Lista de Estoque"; } else { tabelaWrapper.style.display = "none"; btnToggle.innerHTML = "▶️ Mostrar Lista de Estoque"; } }
+function alternarTema() { darFeedback(); document.body.classList.toggle('light-mode'); localStorage.setItem('temaEstoque', document.body.classList.contains('light-mode') ? 'claro' : 'escuro'); }
+
 function resetarTudo() { 
     mostrarConfirmacao("ATENÇÃO: Restaurar lista de fábrica?", () => { 
         localStorage.removeItem(storageKey); 
@@ -761,10 +835,13 @@ function carregarListaDoCelular(event) {
     var r = new FileReader(); 
     r.onload = function(e) { 
         let dados = JSON.parse(e.target.result);
+        // Garantir compatibilidade com dados antigos (sem minUnidade/maxUnidade)
         dados = dados.map(item => ({
             ...item,
             min: item.min !== undefined ? item.min : null,
-            max: item.max !== undefined ? item.max : null
+            max: item.max !== undefined ? item.max : null,
+            minUnidade: item.minUnidade !== undefined ? item.minUnidade : null,
+            maxUnidade: item.maxUnidade !== undefined ? item.maxUnidade : null
         }));
         localStorage.setItem(storageKey, JSON.stringify(dados)); 
         location.reload(); 
