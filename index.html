@@ -52,7 +52,7 @@
             <div id="calc-display">0</div>
             <div class="calc-grid">
                 <button class="calc-btn calc-bg-op" data-calc="C">C</button>
-                <button class="calc-btn calc-bg-op" data-calc="÷">÷</button>
+                <button class="calc-btn calc-bg-op" data-calc="÷">/</button>
                 <button class="calc-btn calc-bg-op" data-calc="×">×</button>
                 <button class="calc-btn calc-bg-op" data-calc="BACK">⌫</button>
                 <button class="calc-btn" data-calc="7">7</button>
@@ -70,6 +70,8 @@
                 <button class="calc-btn" data-calc="0" style="grid-column: span 2;">0</button>
                 <button class="calc-btn" data-calc=",">,</button>
             </div>
+            <!-- Botão para alternar para teclado -->
+            <button id="calc-btn-teclado" class="btn-half" style="margin-top: 10px; background: var(--btn-blue); color: white;">⌨️ Usar teclado</button>
         </div>
     </div>
 
@@ -159,10 +161,9 @@
                     </button>
                     <span class="btn-limpar" data-limpar="novoProduto">✖</span>
                 </div>
-                <div style="position: relative;">
+                <div style="position: relative;" class="input-com-calc">
                     <label>Qtd</label>
                     <input type="text" id="novoQtd" placeholder="Qtd" readonly style="padding-right: 25px; cursor: pointer;">
-                    <span class="btn-limpar" data-limpar="novoQtd">✖</span>
                 </div>
                 <div>
                     <label>Unid</label>
