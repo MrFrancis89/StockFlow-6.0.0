@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estoque v5.2.4 (Professional Dark)</title>
+    <title>StoqueFlow</title>
     
     <link rel="icon" href="icone.png" type="image/png">
     <link rel="apple-touch-icon" href="icone.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Estoque">
+    <meta name="apple-mobile-web-app-title" content="StoqueFlow">
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,8 +22,22 @@
         <div class="modal-box">
             <div id="modal-text">Mensagem</div>
             <div class="modal-buttons">
-                <button id="modal-btn-cancel" onclick="fecharModal(); darFeedback()">Cancelar</button>
+                <button id="modal-btn-cancel">Cancelar</button>
                 <button id="modal-btn-confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de novidades (What's New) -->
+    <div id="modal-whatsnew" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width: 400px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <span style="font-weight: bold; font-size: 18px;">✨ O que há de novo</span>
+                <button class="fechar-whatsnew" style="background: none; border: none; font-size: 20px; color: var(--accent);">✖</button>
+            </div>
+            <div id="whatsnew-content" style="max-height: 300px; overflow-y: auto; font-size: 14px; line-height: 1.6; color: var(--text); white-space: pre-wrap;"></div>
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="fechar-whatsnew" style="background-color: var(--btn-green); color: white; border: none; padding: 10px 30px; border-radius: 8px;">OK</button>
             </div>
         </div>
     </div>
@@ -33,66 +47,55 @@
         <div class="calc-box">
             <div class="calc-header">
                 <span id="calc-title">🧮 Calculadora</span>
-                <button onclick="fecharCalculadora()" class="calc-close">✖</button>
+                <button class="calc-close">✖</button>
             </div>
             <div id="calc-display">0</div>
             <div class="calc-grid">
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('C')">C</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('÷')">÷</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('×')">×</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('BACK')">⌫</button>
-                <button class="calc-btn" onclick="calcDigito('7')">7</button>
-                <button class="calc-btn" onclick="calcDigito('8')">8</button>
-                <button class="calc-btn" onclick="calcDigito('9')">9</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('-')">-</button>
-                <button class="calc-btn" onclick="calcDigito('4')">4</button>
-                <button class="calc-btn" onclick="calcDigito('5')">5</button>
-                <button class="calc-btn" onclick="calcDigito('6')">6</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('+')">+</button>
-                <button class="calc-btn" onclick="calcDigito('1')">1</button>
-                <button class="calc-btn" onclick="calcDigito('2')">2</button>
-                <button class="calc-btn" onclick="calcDigito('3')">3</button>
-                <button class="calc-btn calc-bg-confirm" style="grid-row: span 2;" onclick="calcSalvar()">OK</button>
-                <button class="calc-btn" onclick="calcDigito('0')" style="grid-column: span 2;">0</button>
-                <button class="calc-btn" onclick="calcDigito(',')">,</button>
+                <button class="calc-btn calc-bg-op" data-calc="C">C</button>
+                <button class="calc-btn calc-bg-op" data-calc="÷">÷</button>
+                <button class="calc-btn calc-bg-op" data-calc="×">×</button>
+                <button class="calc-btn calc-bg-op" data-calc="BACK">⌫</button>
+                <button class="calc-btn" data-calc="7">7</button>
+                <button class="calc-btn" data-calc="8">8</button>
+                <button class="calc-btn" data-calc="9">9</button>
+                <button class="calc-btn calc-bg-op" data-calc="-">-</button>
+                <button class="calc-btn" data-calc="4">4</button>
+                <button class="calc-btn" data-calc="5">5</button>
+                <button class="calc-btn" data-calc="6">6</button>
+                <button class="calc-btn calc-bg-op" data-calc="+">+</button>
+                <button class="calc-btn" data-calc="1">1</button>
+                <button class="calc-btn" data-calc="2">2</button>
+                <button class="calc-btn" data-calc="3">3</button>
+                <button class="calc-btn calc-bg-confirm" style="grid-row: span 2;" data-calc="OK">OK</button>
+                <button class="calc-btn" data-calc="0" style="grid-column: span 2;">0</button>
+                <button class="calc-btn" data-calc=",">,</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de configuração de alerta (com selects de unidade) -->
+    <!-- Modal de configuração de alerta -->
     <div id="modal-alerta" class="modal-overlay" style="display:none;">
-        <div class="modal-box" style="max-width: 340px;">
+        <div class="modal-box" style="max-width: 300px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <span style="font-weight: bold;">⚙️ Configurar Alerta</span>
-                <button onclick="fecharModalAlerta()" style="background: none; border: none; font-size: 20px; color: var(--accent);">✖</button>
+                <span style="font-weight: bold;">Configurar Alerta</span>
+                <button class="fechar-modal-alerta" style="background: none; border: none; font-size: 20px; color: var(--accent);">✖</button>
             </div>
-            <div style="margin-bottom: 15px; text-align: left;">
-                <label style="display: block; margin-bottom: 5px;">Qtd. Mínima</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="number" id="alerta-min" placeholder="0" style="flex: 2; padding: 10px;">
-                    <select id="alerta-min-unidade" style="flex: 1; padding: 10px;">
-                        <option value="kg">kg</option><option value="g">g</option><option value="uni">uni</option>
-                        <option value="pct">pct</option><option value="cx">cx</option><option value="bld">bld</option><option value="crt">crt</option>
-                    </select>
-                </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; text-align: left;">Estoque Mínimo</label>
+                <input type="number" id="alerta-min" placeholder="0 (sem alerta)" style="width: 100%; padding: 10px;">
             </div>
-            <div style="margin-bottom: 20px; text-align: left;">
-                <label style="display: block; margin-bottom: 5px;">Qtd. Máxima</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="number" id="alerta-max" placeholder="0" style="flex: 2; padding: 10px;">
-                    <select id="alerta-max-unidade" style="flex: 1; padding: 10px;">
-                        <option value="kg">kg</option><option value="g">g</option><option value="uni">uni</option>
-                        <option value="pct">pct</option><option value="cx">cx</option><option value="bld">bld</option><option value="crt">crt</option>
-                    </select>
-                </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; text-align: left;">Estoque Máximo</label>
+                <input type="number" id="alerta-max" placeholder="0 (sem alerta)" style="width: 100%; padding: 10px;">
             </div>
             <div class="modal-buttons">
-                <button onclick="salvarAlerta()" style="flex: 1; background-color: var(--btn-green); color: white;">Salvar</button>
-                <button onclick="fecharModalAlerta()" style="flex: 1; background: transparent; border: 1px solid var(--border);">Cancelar</button>
+                <button id="salvar-alerta" style="flex: 1; background-color: var(--btn-green); color: white;">Salvar</button>
+                <button class="fechar-modal-alerta" style="flex: 1; background: transparent; border: 1px solid var(--border);">Cancelar</button>
             </div>
         </div>
     </div>
 
+    <!-- Lupa flutuante -->
     <div id="assistive-touch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -100,11 +103,12 @@
         </svg>
     </div>
 
+    <!-- Overlay de busca -->
     <div id="search-overlay">
         <div class="search-inner">
             <div style="position: relative; flex: 1;">
-                <input type="text" id="filtroBusca" placeholder="🔍 Buscar..." oninput="filtrarGeral()" style="padding-right: 55px;">
-                <button class="btn-mic" onclick="toggleMic('busca', event)" id="btn-mic-busca">
+                <input type="text" id="filtroBusca" placeholder="🔍 Buscar..." style="padding-right: 55px;">
+                <button class="btn-mic" id="btn-mic-busca">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                         <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -112,103 +116,116 @@
                         <line x1="8" y1="23" x2="16" y2="23"></line>
                     </svg>
                 </button>
-                <span class="btn-limpar" onclick="limparCampo('filtroBusca')">✖</span>
+                <span class="btn-limpar" data-limpar="filtroBusca">✖</span>
             </div>
-            <select id="filtroSelect" style="max-width: 100px;" onchange="filtrarGeral()">
+            <select id="filtroSelect" style="max-width: 100px;">
                 <option value="">📂 ITENS</option>
             </select>
         </div>
     </div>
 
+    <!-- Cabeçalho -->
     <div class="header-container">
-        <h1 id="titulo-pagina">
-            <span class="titulo-estoque" style="font-weight: 400; letter-spacing: 1px; color: #cccccc;">ESTOQUE</span> 
-            <span style="color: var(--btn-danger); font-weight: 900; margin-left: 4px;">V5.2</span>
-        </h1>
-        <button class="btn-theme" onclick="alternarTema()">🌓</button>
+        <h1 id="titulo-principal">StoqueFlow</h1>
+        <button class="btn-theme">🌓</button>
     </div>
 
-    <div class="card">
-        <div class="input-group">
-            <div style="position: relative;">
-                <label>Produto</label>
-                <input type="text" id="novoProduto" placeholder="Item" oninput="autoPreencherUnidade()" style="padding-right: 55px;">
-                <button class="btn-mic" onclick="toggleMic('produto', event)" id="btn-mic-prod">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-                <span class="btn-limpar" onclick="limparCampo('novoProduto')">✖</span>
+    <!-- Menu de abas -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="estoque">
+            <span class="tab-icon">📦</span>
+            <span class="tab-label">Estoque</span>
+        </button>
+        <button class="nav-tab" data-tab="compras">
+            <span class="tab-icon">🛒</span>
+            <span class="tab-label">Compras</span>
+        </button>
+    </div>
+
+    <!-- Seção Estoque -->
+    <section id="estoque-section" class="tab-content active">
+        <div class="card">
+            <div class="input-group">
+                <div style="position: relative;">
+                    <label>Produto</label>
+                    <input type="text" id="novoProduto" placeholder="Item" style="padding-right: 55px;">
+                    <button class="btn-mic" id="btn-mic-prod">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                    <span class="btn-limpar" data-limpar="novoProduto">✖</span>
+                </div>
+                <div style="position: relative;">
+                    <label>Qtd</label>
+                    <input type="text" id="novoQtd" placeholder="Qtd" readonly style="padding-right: 25px; cursor: pointer;">
+                    <span class="btn-limpar" data-limpar="novoQtd">✖</span>
+                </div>
+                <div>
+                    <label>Unid</label>
+                    <select id="novoUnidade">
+                        <option value="kg">kg</option><option value="g">g</option><option value="uni">uni</option>
+                        <option value="pct">pct</option><option value="cx">cx</option><option value="bld">bld</option><option value="crt">crt</option>
+                    </select>
+                </div>
+                
+                <div class="action-group">
+                    <button id="add-btn" class="btn-half">Adicionar</button>
+                    <button id="add-star-btn" class="btn-half" title="Adicionar item e fixar na lista padrão">⭐ Fixar</button>
+                    <button id="remove-star-btn" class="btn-half" title="Remover item da lista padrão e ocultá-lo">🗑️ Ocultar</button>
+                </div>
             </div>
-            <div style="position: relative;">
-                <label>Qtd</label>
-                <input type="text" id="novoQtd" placeholder="Qtd" onclick="abrirCalculadora(this)" readonly style="padding-right: 25px; cursor: pointer;">
-                <span class="btn-limpar" onclick="limparCampo('novoQtd')">✖</span>
-            </div>
-            <div>
-                <label>Unid</label>
-                <select id="novoUnidade">
-                    <option value="kg">kg</option><option value="g">g</option><option value="uni">uni</option>
-                    <option value="pct">pct</option><option value="cx">cx</option><option value="bld">bld</option><option value="crt">crt</option>
-                </select>
-            </div>
-            
-            <div class="action-group">
-                <button id="add-btn" class="btn-half" onclick="adicionarManual(false)">Adicionar</button>
-                <button id="add-star-btn" class="btn-half" onclick="adicionarManual(true)">⭐ Fixar</button>
-                <button id="remove-star-btn" class="btn-half" onclick="removerDoPadrao()">🗑️ Padrão</button>
+            <div id="status-save">Salvo.</div>
+        </div>
+
+        <button id="btn-toggle-lista">🔽 Ocultar Lista de Estoque</button>
+
+        <div class="table-wrapper">
+            <div id="swipe-bg"></div>
+            <table id="tabela-estoque">
+                <thead>
+                    <tr>
+                        <th class="col-check"><input type="checkbox" id="check-todos"></th>
+                        <th class="col-desc">Descrição</th>
+                        <th class="col-qtd">Qtd</th>
+                        <th class="col-unid">Unid</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-itens-container"></tbody>
+            </table>
+        </div>
+
+        <div class="share-group" style="margin-bottom: 20px;">
+            <button class="btn-zap" id="btn-compartilhar-estoque">Enviar Estoque</button>
+            <button class="btn-zap" id="btn-copiar-estoque">Copiar Estoque</button>
+        </div>
+
+        <button id="btn-novo-dia">☀ INICIAR NOVO DIA (ZERAR QTD)</button>
+        <button id="btn-exportar">💾 SALVAR LISTA NO CELULAR</button>
+        <button id="btn-importar">📂 CARREGAR LISTA DO CELULAR</button>
+        <button id="btn-reset">⚠ RESTAURAR LISTA PADRÃO</button>
+        <input type="file" id="input-arquivo" accept=".json" style="display: none;">
+    </section>
+
+    <!-- Seção Compras -->
+    <section id="compras-section" class="tab-content">
+        <div id="area-compras">
+            <h2 id="titulo-compras">LISTA DE COMPRAS</h2>
+            <ul id="lista-compras-visual"></ul>
+            <div class="share-group">
+                <button class="btn-compra" id="btn-compartilhar-compras">WhatsApp Compras</button>
+                <button class="btn-compra" id="btn-copiar-compras">Copiar Compras</button>
             </div>
         </div>
-        <div id="status-save">Salvo.</div>
-    </div>
+    </section>
 
-    <button id="btn-toggle-lista" onclick="alternarLista()">🔽 Ocultar Lista de Estoque</button>
-
-    <div class="table-wrapper">
-        <!-- Botões de swipe -->
-        <div id="swipe-actions">
-            <div class="swipe-btn swipe-delete">🗑️ Apagar</div>
-            <div class="swipe-btn swipe-alert">🔔 Alerta</div>
-        </div>
-        <table id="tabela-estoque">
-            <thead>
-                <tr>
-                    <th class="col-check"><input type="checkbox" id="check-todos" onchange="alternarTodos(this)"></th>
-                    <th class="col-desc">Descrição</th>
-                    <th class="col-qtd">Qtd</th>
-                    <th class="col-unid">Unid</th>
-                </tr>
-            </thead>
-            <tbody id="lista-itens-container"></tbody>
-        </table>
-    </div>
-
-    <div class="share-group" style="margin-bottom: 20px;">
-        <button class="btn-zap" onclick="darFeedback(); compartilharEstoque()">Enviar Estoque</button>
-        <button id="btn-copiar" class="btn-zap" onclick="copiarEstoque()">Copiar Estoque</button>
-    </div>
-
-    <div id="area-compras">
-        <h2 id="titulo-compras">LISTA DE COMPRAS</h2>
-        <ul id="lista-compras-visual"></ul>
-        <div class="share-group">
-            <button class="btn-compra" onclick="darFeedback(); compartilharComprasZap()">WhatsApp Compras</button>
-            <button class="btn-compra" onclick="copiarCompras()">Copiar Compras</button>
-        </div>
-    </div>
-
-    <button id="btn-novo-dia" onclick="iniciarNovoDia()">☀ INICIAR NOVO DIA (ZERAR QTD)</button>
-    <button id="btn-exportar" onclick="salvarListaNoCelular()">💾 SALVAR LISTA NO CELULAR</button>
-    <button id="btn-importar" onclick="darFeedback(); document.getElementById('input-arquivo').click()">📂 CARREGAR LISTA DO CELULAR</button>
-    <button id="btn-reset" onclick="resetarTudo()">⚠ RESTAURAR LISTA PADRÃO</button>
-    <input type="file" id="input-arquivo" accept=".json" style="display: none;" onchange="carregarListaDoCelular(event)">
-
+    <!-- Botões flutuantes -->
     <div class="nav-float">
-        <button class="btn-nav" onclick="darFeedback(); window.scrollTo(0,0)">▲</button>
-        <button class="btn-nav" onclick="darFeedback(); window.scrollTo(0, document.body.scrollHeight)">▼</button>
+        <button class="btn-nav" id="btn-scroll-top">▲</button>
+        <button class="btn-nav" id="btn-scroll-bottom">▼</button>
     </div>
 
     <script src="produtos.js"></script>
